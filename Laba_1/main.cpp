@@ -14,5 +14,5 @@ int main() {
     std::cout << "----------------- stl tests --------------------" << std::endl;
     run_stl_tests();
 
-    return 0; /// Создать GUI
+    return 0; 
 }
