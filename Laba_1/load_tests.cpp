@@ -1,6 +1,8 @@
 #include "smrt_ptr.h"
 #include <chrono>
+#include <vector>
 #include <iostream>
+
 
 // Структура для тестирования
 struct TestObject {
@@ -63,23 +65,25 @@ double test_dereference(int iterations) {
     return duration_sec.count();
 }
 
-void run_load_tests(){
+std::vector<double> run_load_tests() {
     const int iterations = 1000000; // Количество итераций для тестов
+    std::vector<double> results;
 
     // Тест создания
     double creation_time = test_creation<TestObject>(iterations);
-    std::cout << "Born time: " << iterations << " smrt_ptr: " << creation_time << " sec\n";
+    results.push_back(creation_time);
 
     // Тест копирования
     double copy_time = test_copy<TestObject>(iterations);
-    std::cout << "Copy time: " << iterations << " smrt_ptr: " << copy_time << " sec\n";
+    results.push_back(copy_time);
 
     // Тест присваивания
     double assignment_time = test_assignment<TestObject>(iterations);
-    std::cout << "Assigment time: " << iterations << " smrt_ptr: " << assignment_time << " sec\n";
+    results.push_back(assignment_time);
 
     // Тест разыменования
     double dereference_time = test_dereference<TestObject>(iterations);
-    std::cout << "Dereference time: " << iterations << " smrt_ptr: " << dereference_time << " sec\n";
+    results.push_back(dereference_time);
 
+    return results;
 }

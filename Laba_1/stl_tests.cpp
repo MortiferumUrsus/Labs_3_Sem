@@ -1,6 +1,7 @@
 #include <memory>
 #include <chrono>
 #include <iostream>
+#include <vector>
 
 struct TestObject {
     int data[100]; // Размер объекта можно менять для тестирования
@@ -60,22 +61,25 @@ double test_dereference(int iterations) {
     return duration_sec.count();
 }
 
-void run_stl_tests() {
+std::vector<double> run_stl_tests() {
     const int iterations = 1000000; // Количество итераций для тестов
+    std::vector<double> results;
 
     // Тест создания std::shared_ptr
     double creation_time_std = test_creation(iterations);
-    std::cout << "Borntime: " << iterations << " std::shared_ptr: " << creation_time_std << " sec\n";
+    results.push_back(creation_time_std);
 
     // Тест копирования std::shared_ptr
     double copy_time_std = test_copy(iterations);
-    std::cout << "Copy time: " << iterations << " std::shared_ptr: " << copy_time_std << " sec\n";
+    results.push_back(copy_time_std);
 
     // Тест присваивания std::shared_ptr
     double assignment_time_std = test_assignment(iterations);
-    std::cout << "Assigment time: " << iterations << " std::shared_ptr: " << assignment_time_std << " sec\n";
+    results.push_back(assignment_time_std);
 
     // Тест разыменования std::shared_ptr
     double dereference_time_std = test_dereference(iterations);
-    std::cout << "Dereference time: " << iterations << " std::shared_ptr: " << dereference_time_std << " sec\n";
+    results.push_back(dereference_time_std);
+
+    return results;
 }
