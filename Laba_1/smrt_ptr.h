@@ -85,6 +85,11 @@ public:
     std::size_t use_count() const {
         return ref_count ? *ref_count : 0;
     }
+
+    // Метод для получения сырого указателя
+    T* get() const {
+        return ptr;
+    }
 };
 
 #endif // smrt_ptr_H

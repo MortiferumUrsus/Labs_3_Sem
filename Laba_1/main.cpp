@@ -1,7 +1,8 @@
+#include <iostream>
 #include "ui.h"
 
 
 int main() {
-    start();
+        start();
     return 0;
 }
