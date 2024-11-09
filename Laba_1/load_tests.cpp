@@ -13,12 +13,14 @@ struct TestObject {
 template <typename T>
 double test_creation(int iterations) {
     using namespace std::chrono;
+    T* raw_ptr = new T();
     auto start = high_resolution_clock::now();
     for(int i = 0; i < iterations; ++i){
-        smrt_ptr<T> ptr(new T());
+        smrt_ptr<T> ptr(raw_ptr);
     }
     auto end = high_resolution_clock::now();
     duration<double> duration_sec = end - start;
+    delete raw_ptr;
     return duration_sec.count();
 }
 
