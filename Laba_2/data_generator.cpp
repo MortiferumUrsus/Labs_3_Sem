@@ -9,7 +9,7 @@ Sequence<Person>* generate_data(int size) {
     ArraySequence<Person>* sequence = new ArraySequence<Person>(size);
 
     std::string first_names[] = {"Donald", "Joe", "Jane", "Alice", "Bob", "Mike"};
-    std::string last_names[] = {"Tramp", "Biden", "Smith", "Johnson", "Williams", "Brown", "Jones"};
+    std::string last_names[] = {"Tramp", "Biden", "Smith", "Johnson", "Williams", "Black ", "Jones"};
     std::string genders[] = {"Combat helicopter", "Cucumber", "Male", "Female"}; 
 
     int num_first_names = sizeof(first_names)/sizeof(first_names[0]);

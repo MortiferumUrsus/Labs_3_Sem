@@ -12,7 +12,7 @@
 #include "comparator.h"
 #include <chrono>
 
-void run_application() {
+void start() {
     int data_size = 10000; // Размер данных по умолчанию
     Sequence<Person>* data = nullptr; // Указатель на данные
     int algorithm_choice = 1; // Выбранный алгоритм сортировки

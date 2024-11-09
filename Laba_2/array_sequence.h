@@ -11,6 +11,12 @@ private:
     T* data; // Динамический массив данных
     int length; // Длина последовательности
 
+    void is_index(index){
+        if (index < 0 || index >= length) {
+            throw std::out_of_range("Index out of range in ArraySequence::set");
+        }
+    }
+
 public:
     // Конструктор с заданным размером
     ArraySequence(int size) : length(size), data(new T[size]) {}
@@ -29,17 +35,13 @@ public:
 
     // Получить элемент по индексу
     T get(int index) const override {
-        if (index < 0 || index >= length) {
-            throw std::out_of_range("Index out of range in ArraySequence::get");
-        }
+        is_index(index);
         return data[index];
     }
 
     // Установить элемент по индексу
     void set(int index, T value) override {
-        if (index < 0 || index >= length) {
-            throw std::out_of_range("Index out of range in ArraySequence::set");
-        }
+        is_index(index);
         data[index] = value;
     }
 
