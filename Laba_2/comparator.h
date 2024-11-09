@@ -29,4 +29,8 @@ int compare_by_year_of_birth(const Person& a, const Person& b) {
     return a.year_of_birth - b.year_of_birth;
 }
 
+int compare_by_gender(const Person& a, const Person& b) {
+    return a.gender.compare(b.gender);
+}
+
 #endif // COMPARATOR_H

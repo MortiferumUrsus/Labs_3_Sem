@@ -8,11 +8,13 @@
 Sequence<Person>* generate_data(int size) {
     ArraySequence<Person>* sequence = new ArraySequence<Person>(size);
 
-    std::string first_names[] = {"John", "Jane", "Alice", "Bob", "Mike"};
-    std::string last_names[] = {"Smith", "Johnson", "Williams", "Brown", "Jones"};
+    std::string first_names[] = {"Donald", "Joe", "Jane", "Alice", "Bob", "Mike"};
+    std::string last_names[] = {"Tramp", "Biden", "Smith", "Johnson", "Williams", "Brown", "Jones"};
+    std::string genders[] = {"Combat helicopter", "Cucumber", "Male", "Female"}; 
 
     int num_first_names = sizeof(first_names)/sizeof(first_names[0]);
     int num_last_names = sizeof(last_names)/sizeof(last_names[0]);
+    int num_genders = sizeof(genders)/sizeof(genders[0]);
 
     std::srand(std::time(nullptr));
 
@@ -23,6 +25,7 @@ Sequence<Person>* generate_data(int size) {
         person.year_of_birth = 1950 + std::rand() % 71; // Год от 1950 до 2020
         person.height = 150.0f + static_cast<float>(std::rand() % 51); // Рост от 150 до 200 см
         person.weight = 50.0f + static_cast<float>(std::rand() % 51); // Вес от 50 до 100 кг
+        person.gender = genders[std::rand() % num_genders];
 
         sequence->set(i, person);
     }

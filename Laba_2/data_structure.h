@@ -10,6 +10,7 @@ struct Person {
     int year_of_birth;      // Год рождения
     float height;           // Рост
     float weight;           // Вес
+    std::string gender;     // Гендер
 };
 
 #endif // DATA_STRUCTURE_H

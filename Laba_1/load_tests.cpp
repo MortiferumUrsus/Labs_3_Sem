@@ -11,7 +11,7 @@ struct TestObject {
 
 // Функция для измерения времени создания smrt_ptr
 template <typename T>
-double test_creation(int iterations) {
+double load_test_creation(int iterations) {
     using namespace std::chrono;
     T* raw_ptr = new T();
     auto start = high_resolution_clock::now();
@@ -26,7 +26,7 @@ double test_creation(int iterations) {
 
 // Функция для измерения времени копирования smrt_ptr
 template <typename T>
-double test_copy(int iterations) {
+double load_test_copy(int iterations) {
     using namespace std::chrono;
     smrt_ptr<T> original(new T());
     auto start = high_resolution_clock::now();
@@ -40,7 +40,7 @@ double test_copy(int iterations) {
 
 // Функция для измерения времени присваивания smrt_ptr
 template <typename T>
-double test_assignment(int iterations) {
+double load_test_assignment(int iterations) {
     using namespace std::chrono;
     smrt_ptr<T> target;
     smrt_ptr<T> source(new T());
@@ -55,7 +55,7 @@ double test_assignment(int iterations) {
 
 // Функция для измерения времени разыменования smrt_ptr
 template <typename T>
-double test_dereference(int iterations) {
+double load_test_dereference(int iterations) {
     using namespace std::chrono;
     smrt_ptr<T> ptr(new T());
     auto start = high_resolution_clock::now();
@@ -72,19 +72,19 @@ std::vector<double> run_load_tests() {
     std::vector<double> results;
 
     // Тест создания
-    double creation_time = test_creation<TestObject>(iterations);
+    double creation_time = load_test_creation<TestObject>(iterations);
     results.push_back(creation_time);
 
     // Тест копирования
-    double copy_time = test_copy<TestObject>(iterations);
+    double copy_time = load_test_copy<TestObject>(iterations);
     results.push_back(copy_time);
 
     // Тест присваивания
-    double assignment_time = test_assignment<TestObject>(iterations);
+    double assignment_time = load_test_assignment<TestObject>(iterations);
     results.push_back(assignment_time);
 
     // Тест разыменования
-    double dereference_time = test_dereference<TestObject>(iterations);
+    double dereference_time = load_test_dereference<TestObject>(iterations);
     results.push_back(dereference_time);
 
     return results;

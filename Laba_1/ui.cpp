@@ -8,16 +8,6 @@
 #include "smrt_ptr.h" 
 
 
-struct TestParameters {
-    double creation_time;
-    double copy_time;
-    double assignment_time;
-    double dereference_time;
-
-    TestParameters()
-        : creation_time(1.0), copy_time(1.0), assignment_time(1.0), dereference_time(1.0) {}
-};
-
 class SmartPointerManager {
 public:
     void create_pointer() {
@@ -90,7 +80,6 @@ void display_help() {
     std::cout << "2 - Run load test\n";
     std::cout << "3 - Run STL test\n";
     std::cout << "4 - Manage smart pointers\n";
-    std::cout << "s - Configure test parameters\n";
     std::cout << "r - Show test results\n";
     std::cout << "q - Exit the program\n";
 }
@@ -130,19 +119,6 @@ void manage_smart_pointers(SmartPointerManager& manager) {
     }
 }
 
-void configure_test_parameters(TestParameters& params) {
-    std::cout << "Configuring test parameters:\n";
-    std::cout << "Enter creation time: ";
-    std::cin >> params.creation_time;
-    std::cout << "Enter copy time: ";
-    std::cin >> params.copy_time;
-    std::cout << "Enter assignment time: ";
-    std::cin >> params.assignment_time;
-    std::cout << "Enter dereference time: ";
-    std::cin >> params.dereference_time;
-    std::cout << "Parameters updated.\n";
-}
-
 void print_results(const std::vector<std::string>& testNames, const std::vector<std::vector<double>>& results) {
     std::cout << std::fixed << std::setprecision(2);
 
@@ -168,7 +144,6 @@ void start() {
     bool running = true;
     std::vector<std::string> testNames = {"Functional Test", "Load Test", "STL Test"};
     std::vector<std::vector<double>> testResults;
-    TestParameters testParams;
     SmartPointerManager ptrManager; 
 
     display_help();
@@ -186,26 +161,21 @@ void start() {
         }
         else if (command == "2") {
             // Запустит лоады
-            double creationTime = test_creation(testParams.creation_time);
-            double copyTime = test_copy(testParams.copy_time);
-            double assignmentTime = test_assignment(testParams.assignment_time);
-            double derefTime = test_dereference(testParams.dereference_time);
-            testResults.emplace_back(std::vector<double>{creationTime, copyTime, assignmentTime, derefTime});
-            testNames.push_back("Load Test");
+            std::vector<double> loadResults = run_load_tests(); // Вернет вектор результатов
+            testResults.push_back(loadResults);
+            testNames.push_back("STL Test");
+            running = true;
         }
         else if (command == "3") {
             // Запустить стл тесты
             std::vector<double> stlResults = run_stl_tests(); // Вернет вектор результатов
             testResults.push_back(stlResults);
             testNames.push_back("STL Test");
+            running = true;
         }
         else if (command == "4") {
             // Посмотреть поинтеры
             manage_smart_pointers(ptrManager);
-        }
-        else if (command == "s") {
-            // Задать параметры
-            configure_test_parameters(testParams);
         }
         else if (command == "r") {
             // Результаты теста

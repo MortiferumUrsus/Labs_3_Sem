@@ -36,6 +36,7 @@ void run_application() {
             case 3: std::cout << "Height"; break;
             case 4: std::cout << "Weight"; break;
             case 5: std::cout << "Year of Birth"; break;
+            case 6: std::cout << "Gender"; break;
             default: std::cout << "Unknown"; break;
         }
         std::cout << ")\n";
@@ -64,6 +65,7 @@ void run_application() {
             std::cout << "3. Height\n";
             std::cout << "4. Weight\n";
             std::cout << "5. Year of Birth\n";
+            std::cout << "6. Gender\n";
             std::cin >> comparator_choice;
         } else if (choice == 3) {
             // Установка размера данных
@@ -114,6 +116,9 @@ void run_application() {
                 case 5:
                     comparator = compare_by_year_of_birth;
                     break;
+                case 6:
+                    comparator = compare_by_gender;
+                    break;
                 default:
                     std::cout << "Invalid comparator choice.\n";
                     continue;
@@ -141,7 +146,8 @@ void run_application() {
             for (int i = 0; i < length; ++i) {
                 Person p = data->get(i);
                 std::cout << p.first_name << " " << p.last_name << ", Year: " << p.year_of_birth
-                          << ", Height: " << p.height << ", Weight: " << p.weight << "\n";
+                          << ", Height: " << p.height << ", Weight: " << p.weight << ", Gender: " 
+                          << p.gender << "\n""\n";
                 if (i >= 100) {
                     std::cout << "... (data truncated)\n";
                     break;

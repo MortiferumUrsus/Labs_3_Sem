@@ -8,7 +8,7 @@ struct TestObject {
 };
 
 // Функция для измерения времени создания std::shared_ptr
-double test_creation(int iterations) {
+double stl_test_creation(int iterations) {
     using namespace std::chrono;
     auto start = high_resolution_clock::now();
     for(int i = 0; i < iterations; ++i){
@@ -20,7 +20,7 @@ double test_creation(int iterations) {
 }
 
 // Функция для измерения времени копирования std::shared_ptr
-double test_copy(int iterations) {
+double stl_test_copy(int iterations) {
     using namespace std::chrono;
     std::shared_ptr<TestObject> original = std::make_shared<TestObject>();
     auto start = high_resolution_clock::now();
@@ -33,7 +33,7 @@ double test_copy(int iterations) {
 }
 
 // Функция для измерения времени присваивания std::shared_ptr
-double test_assignment(int iterations) {
+double stl_test_assignment(int iterations) {
     using namespace std::chrono;
     std::shared_ptr<TestObject> target;
     std::shared_ptr<TestObject> source = std::make_shared<TestObject>();
@@ -47,7 +47,7 @@ double test_assignment(int iterations) {
 }
 
 // Функция для измерения времени разыменования std::shared_ptr
-double test_dereference(int iterations) {
+double stl_test_dereference(int iterations) {
     using namespace std::chrono;
     std::shared_ptr<TestObject> ptr = std::make_shared<TestObject>();
     volatile int value; // volatile предотвращает оптимизацию
@@ -66,19 +66,19 @@ std::vector<double> run_stl_tests() {
     std::vector<double> results;
 
     // Тест создания std::shared_ptr
-    double creation_time_std = test_creation(iterations);
+    double creation_time_std = stl_test_creation(iterations);
     results.push_back(creation_time_std);
 
     // Тест копирования std::shared_ptr
-    double copy_time_std = test_copy(iterations);
+    double copy_time_std = stl_test_copy(iterations);
     results.push_back(copy_time_std);
 
     // Тест присваивания std::shared_ptr
-    double assignment_time_std = test_assignment(iterations);
+    double assignment_time_std = stl_test_assignment(iterations);
     results.push_back(assignment_time_std);
 
     // Тест разыменования std::shared_ptr
-    double dereference_time_std = test_dereference(iterations);
+    double dereference_time_std = stl_test_dereference(iterations);
     results.push_back(dereference_time_std);
 
     return results;

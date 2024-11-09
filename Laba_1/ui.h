@@ -7,15 +7,6 @@
 #include <string>
 #include "smrt_ptr.h"
 
-struct TestParameters {
-    double creation_time;
-    double copy_time;
-    double assignment_time;
-    double dereference_time;
-
-    TestParameters();
-};
-
 class SmartPointerManager {
 public:
     void create_pointer();
@@ -29,7 +20,6 @@ private:
 
 void display_help();
 void manage_smart_pointers(SmartPointerManager& manager);
-void configure_test_parameters(TestParameters& params);
 void print_results(const std::vector<std::string>& testNames, const std::vector<std::vector<double>>& results);
 void start();
 
