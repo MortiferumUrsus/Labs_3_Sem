@@ -86,6 +86,32 @@ public:
         return length;
     }
 
+    // Новый метод: возвращает длину последовательности
+    size_t get_length() const {
+        return length;
+    }
+
+    // Новый метод: создаёт и возвращает копию (клон) текущей последовательности
+    sequence<T> clone() const {
+        return sequence<T>(*this);
+    }
+
+    // Новый метод: возвращает элемент по индексу
+    T get(int index) const {
+        if (index < 0 || index >= length) {
+            throw std::out_of_range("Index out of range");
+        }
+        return data[index];
+    }
+
+    // Новый метод: устанавливает элемент по индексу
+    void set(int index, const T& value) {
+        if (index < 0 || index >= length) {
+            throw std::out_of_range("Index out of range");
+        }
+        data[index] = value;
+    }
+
     // Перегрузка оператора доступа по индексу с проверкой границ
     T& operator[](size_t index) {
         if (index >= length) {

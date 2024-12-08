@@ -13,14 +13,16 @@ struct TestObject {
 template <typename T>
 double load_test_creation(int iterations) {
     using namespace std::chrono;
-    T* raw_ptr = new T();
+    T** ptrs = new T*[iterations];
     auto start = high_resolution_clock::now();
     for(int i = 0; i < iterations; ++i){
-        smrt_ptr<T> ptr(raw_ptr);
+        ptrs[i] = new T(); //// Разобрать с этой штукой
     }
     auto end = high_resolution_clock::now();
+    for(int i = 0; i < iterations; ++i) {
+        delete ptrs[i];
+    }
     duration<double> duration_sec = end - start;
-    delete raw_ptr;
     return duration_sec.count();
 }
 
@@ -70,22 +72,17 @@ double load_test_dereference(int iterations) {
 std::vector<double> run_load_tests() {
     const int iterations = 1000000; // Количество итераций для тестов
     std::vector<double> results;
-
     // Тест создания
     double creation_time = load_test_creation<TestObject>(iterations);
     results.push_back(creation_time);
-
     // Тест копирования
     double copy_time = load_test_copy<TestObject>(iterations);
     results.push_back(copy_time);
-
     // Тест присваивания
     double assignment_time = load_test_assignment<TestObject>(iterations);
     results.push_back(assignment_time);
-
     // Тест разыменования
     double dereference_time = load_test_dereference<TestObject>(iterations);
     results.push_back(dereference_time);
-
     return results;
 }

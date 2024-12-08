@@ -142,10 +142,9 @@ void print_results(const std::vector<std::string>& testNames, const std::vector<
 void start() {
     std::string command;
     bool running = true;
-    std::vector<std::string> testNames = {"Functional Test", "Load Test", "STL Test"};
+    std::vector<std::string> testNames = {};
     std::vector<std::vector<double>> testResults;
     SmartPointerManager ptrManager; 
-
     display_help();
 
     while (running) {
@@ -158,12 +157,14 @@ void start() {
         else if (command == "1") {
             // Запустить функциональные тесты
             run_functional_tests(); 
+            std::cout << "all tests passed";
+            running = true;
         }
         else if (command == "2") {
             // Запустит лоады
             std::vector<double> loadResults = run_load_tests(); // Вернет вектор результатов
             testResults.push_back(loadResults);
-            testNames.push_back("STL Test");
+            testNames.push_back("Load Test");
             running = true;
         }
         else if (command == "3") {

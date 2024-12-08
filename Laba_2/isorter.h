@@ -8,7 +8,7 @@ template<typename T>
 class ISorter {
 public:
     // Виртуальная функция сортировки
-    virtual Sequence<T>* sort(Sequence<T>* seq, int (*cmp)(const T&, const T&)) = 0;
+    virtual Sequence<T>* sort(const Sequence<T>& seq, int (*cmp)(const T&, const T&)) = 0; /// Переделать на конст ссылку
     virtual ~ISorter() = default; // Виртуальный деструктор
 };
 

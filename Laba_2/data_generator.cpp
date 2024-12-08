@@ -3,18 +3,47 @@
 #include <cstdlib>
 #include <ctime>
 #include <string>
+#include <iostream>
+#include <fstream>
+#include <vector>
+
+// Функция для чтения имен из файла
+std::vector<std::string> read_names_from_file(const std::string& filename) {
+    std::ifstream file(filename);
+    std::vector<std::string> names;
+    std::string name;
+
+    if (!file) {
+        std::cerr << "Ошибка при открытии файла " << filename << std::endl;
+        return names;
+    }
+
+    while (std::getline(file, name)) {
+        if (!name.empty()) {
+            names.push_back(name);
+        }
+    }
+
+    return names;
+}
 
 // Функция для генерации последовательности Person
-Sequence<Person>* generate_data(int size) {
+Sequence<Person>* generate_data(int size, const std::string& first_names_file, const std::string& last_names_file) {
     ArraySequence<Person>* sequence = new ArraySequence<Person>(size);
+    std::ofstream outFile("generated_data.txt");
 
-    std::string first_names[] = {"Donald", "Joe", "Jane", "Alice", "Bob", "Mike"};
-    std::string last_names[] = {"Tramp", "Biden", "Smith", "Johnson", "Williams", "Black ", "Jones"};
+    if (!outFile) {
+        std::cerr << "Ошибка при открытии файла для записи." << std::endl;
+        return nullptr;
+    }
+
+    auto first_names = read_names_from_file(first_names_file);
+    auto last_names = read_names_from_file(last_names_file);
     std::string genders[] = {"Combat helicopter", "Cucumber", "Male", "Female"}; 
 
-    int num_first_names = sizeof(first_names)/sizeof(first_names[0]);
-    int num_last_names = sizeof(last_names)/sizeof(last_names[0]);
-    int num_genders = sizeof(genders)/sizeof(genders[0]);
+    int num_first_names = first_names.size();
+    int num_last_names = last_names.size();
+    int num_genders = sizeof(genders) / sizeof(genders[0]);
 
     std::srand(std::time(nullptr));
 
@@ -28,7 +57,16 @@ Sequence<Person>* generate_data(int size) {
         person.gender = genders[std::rand() % num_genders];
 
         sequence->set(i, person);
+
+        // Записываем данные в файл
+        outFile << person.first_name << " "
+                << person.last_name << " "
+                << person.year_of_birth << " "
+                << person.height << " "
+                << person.weight << " "
+                << person.gender << std::endl;
     }
 
+    outFile.close(); // Закрываем файл
     return sequence;
 }

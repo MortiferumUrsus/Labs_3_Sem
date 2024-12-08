@@ -11,11 +11,12 @@ private:
     T* data; // Динамический массив данных
     int length; // Длина последовательности
 
-    void is_index(index){
+    void is_index(int index) const {
         if (index < 0 || index >= length) {
             throw std::out_of_range("Index out of range in ArraySequence::set");
         }
     }
+
 
 public:
     // Конструктор с заданным размером

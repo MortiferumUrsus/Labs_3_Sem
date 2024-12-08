@@ -2,6 +2,7 @@
 #include "smrt_ptr.h"
 #include <cassert>
 #include <iostream>
+#include <vector>
 
 void create_copy_test(){
     smrt_ptr<int> ptr1(new int(5));
@@ -43,20 +44,13 @@ void use_count_empty_ptr_test(){
 }
 
 void run_functional_tests() {
-    
     // Тест разыменовывания
     dereference_empty_ptr_test();
-
     // Тест создания и копирования
     create_copy_test();
-
     // Тест смены значения
     change_value_test();
-
     // Тест проверки количества указателей 
     use_count_empty_ptr_test();
-
-
-    std::cout << "all test passed" << std::endl;
 }
 

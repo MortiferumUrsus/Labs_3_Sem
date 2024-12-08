@@ -8,7 +8,7 @@ template<typename T>
 class InsertionSorter : public ISorter<T> {
 public:
     // Функция сортировки
-    Sequence<T>* sort(Sequence<T>* seq, int (*cmp)(const T&, const T&)) override {
+    Sequence<T> sort(Sequence<T>* seq, int (*cmp)(const T&, const T&)) override {
         int n = seq->get_length();
         Sequence<T>* sorted_seq = seq->clone(); // Клонирование последовательности
 
@@ -21,6 +21,7 @@ public:
             }
             sorted_seq->set(j + 1, key);
         }
+
         return sorted_seq;
     }
 };
