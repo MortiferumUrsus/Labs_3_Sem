@@ -22,25 +22,55 @@
 #include "sorters/selection_sorter.h"
 #include "sorters/shaker_sorter.h"
 #include "sorters/shell_sorter.h"
-#include "sorters/stl_sort.h"
 #include "sorters/tree_selection_sorter.h"
+#include "sort_tests.h"
 
 
-std::string which_algorithm(int algorithm_choice){
+std::string which_algorithm(int algorithm_choice) {
     std::string sorter_name;
     switch (algorithm_choice) {
-    case 1:
-        sorter_name = "insertion_sort";
-        break;
-    case 2:
-        sorter_name = "binary_insertion_sort";
-        break;
-    case 3:
-        sorter_name = "shaker_sort";
-        break;
-    default:
-        sorter_name = "unknown_sort";
-        break;
+        case 1:
+            sorter_name = "Insertion Sort";
+            break;
+        case 2:
+            sorter_name = "Binary Insertion Sort";
+            break;
+        case 3:
+            sorter_name = "Shaker Sort";
+            break;
+        case 4:
+            sorter_name = "Bubble Sort";
+            break;
+        case 5:
+            sorter_name = "Counting Sort";
+            break;
+        case 6:
+            sorter_name = "Heap Sort";
+            break;
+        case 7:
+            sorter_name = "Merge Sort";
+            break;
+        case 8:
+            sorter_name = "Quadratic Selection Sort";
+            break;
+        case 9:
+            sorter_name = "Quick Sort";
+            break;
+        case 10:
+            sorter_name = "Selection Sort";
+            break;
+        case 11:
+            sorter_name = "Shell Sort";
+            break;
+        case 12:
+            sorter_name = "Tree Selection Sort";
+            break;
+        case 13:
+            sorter_name = "Batcher Sort";
+            break;
+        default:
+            sorter_name = "Unknown Sort";
+            break;
     }
     return sorter_name;
 }
@@ -66,7 +96,7 @@ void print_data(Sequence<Person>* data){
                 << "Number of Children: " << p.number_of_children << "\n"
                 << "Years of Experience: " << p.years_of_experience << "\n"
                 << "------------------------------------\n";
-        if (i >= 100) {
+        if (i >= 10) {
             std::cout << "... (data truncated)\n";
             break;
         }
@@ -96,9 +126,8 @@ void start() {
             case 9: std::cout << "Quick Sort"; break;
             case 10: std::cout << "Selection Sort"; break;
             case 11: std::cout << "Shell Sort"; break;
-            case 12: std::cout << "STL Sort"; break;
-            case 13: std::cout << "Tree Selection Sort"; break;
-            case 14: std::cout << "Batcher Sort"; break;
+            case 12: std::cout << "Tree Selection Sort"; break;
+            case 13: std::cout << "Batcher Sort"; break;
             default: std::cout << "Unknown"; break;
         }
         std::cout << ")\n";
@@ -127,7 +156,9 @@ void start() {
         std::cout << "5. Sort data and measure time\n";
         std::cout << "6. View data\n";
         std::cout << "7. View sorted data\n";
-        std::cout << "8. Exit\n";
+        std::cout << "8. Start functional tests\n";
+        std::cout << "9. Start load tests\n";
+        std::cout << "10. Exit\n";
         std::cout << "Choose an option: ";
 
         int choice;
@@ -147,9 +178,9 @@ void start() {
             std::cout << "9. Quick Sort\n";
             std::cout << "10. Selection Sort\n";
             std::cout << "11. Shell Sort\n";
-            std::cout << "12. STL Sort\n";
-            std::cout << "13. Tree Selection Sort\n";
-            std::cout << "14. Batcher Sort\n";
+            std::cout << "12. Tree Selection Sort\n";
+            std::cout << "13. Batcher Sort\n";
+            std::cout << "Choose an option: ";
             std::cin >> algorithm_choice;
         } else if (choice == 2) {
             // Выбор критерия сортировки
@@ -326,9 +357,16 @@ void start() {
             std::string sort_data_file = "sorted_data_" + sorter_name + ".csv";
             std::cout << sort_data_file << "\n";
             Sequence<Person>* data = load_data(sort_data_file, data_size);
-            int length = data->get_length();
             print_data(data);
         } else if (choice == 8) {
+            std::cout << "Running functional tests...\n";
+            run_functional_tests("functional_tests.csv");
+            std::cout << "Functional tests completed. Results saved to functional_tests.csv.\n";
+        } else if (choice == 9) {
+            std::cout << "Running performance tests...\n";
+            run_performance_tests("performance_tests.csv");
+            std::cout << "Performance tests completed. Results saved to performance_tests.csv.\n";
+        } else if (choice == 10) {
             // Выход из программы
             break;
         } else {

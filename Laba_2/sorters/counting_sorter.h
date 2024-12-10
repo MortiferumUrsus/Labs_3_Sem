@@ -5,50 +5,65 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include "../array_sequence.h"
 
 // Класс сортировщика сортировкой подсчетом
 template<typename T>
 class CountingSorter : public ISorter<T> {
 public:
-    // Предполагается, что T – целочисленный тип
     Sequence<T>* sort(Sequence<T>* seq, int (*cmp)(const T&, const T&)) override {
         int n = seq->get_length();
         if (n == 0) return seq->clone();
 
-        // Найти диапазон значений
+        // Определяем минимальные и максимальные значения по компаратору
         T min = seq->get(0);
         T max = seq->get(0);
         for (int i = 1; i < n; ++i) {
-            if (seq->get(i) < min) min = seq->get(i);
-            if (seq->get(i) > max) max = seq->get(i);
+            if (cmp(seq->get(i), min) < 0) min = seq->get(i);
+            if (cmp(seq->get(i), max) > 0) max = seq->get(i);
         }
 
-        int range = max - min + 1;
-        std::vector<int> count(range, 0);
+        // Создаем счетчик и временный выходной массив
+        std::vector<int> count(n, 0);
+        std::vector<T> output(n);
 
         // Подсчитать количество каждого элемента
         for (int i = 0; i < n; ++i) {
-            count[seq->get(i) - min]++;
+            int index = 0;
+            for (int j = 0; j < n; ++j) {
+                if (cmp(seq->get(i), seq->get(j)) == 0) {
+                    index = j;
+                    break;
+                }
+            }
+            count[index]++;
         }
 
-        // Изменить счетчик, чтобы он содержал позиции
-        for (int i = 1; i < range; ++i) {
+        // Изменяем счетчик, чтобы он содержал позиции
+        for (int i = 1; i < n; ++i) {
             count[i] += count[i - 1];
         }
 
-        // Создать выходную последовательность
-        Sequence<T>* sorted_seq = seq->clone();
-        Sequence<T>* output = new ArraySequence<T>;
-
         // Построить отсортированную последовательность
         for (int i = n - 1; i >= 0; --i) {
-            T element = seq->get(i);
-            output->set(count[element - min] - 1, element);
-            count[element - min]--;
+            int index = 0;
+            for (int j = 0; j < n; ++j) {
+                if (cmp(seq->get(i), seq->get(j)) == 0) {
+                    index = j;
+                    break;
+                }
+            }
+            output[count[index] - 1] = seq->get(i);
+            count[index]--;
         }
 
-        delete sorted_seq;
-        return output;
+        // Создаем выходную последовательность
+        Sequence<T>* sorted_seq = new ArraySequence<T>(n);
+        for (int i = 0; i < n; ++i) {
+            sorted_seq->set(i, output[i]);
+        }
+
+        return sorted_seq;
     }
 };
 

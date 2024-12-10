@@ -4,6 +4,7 @@
 #include "../isorter.h"
 #include <iostream>
 #include <vector>
+#include "../array_sequence.h"
 
 // Класс сортировщика с использованием схемы Бэтчера (Batcher's Bitonic Sort)
 template<typename T>
@@ -28,7 +29,7 @@ public:
 
 private:
     Sequence<T>* extend_sequence(Sequence<T>* seq, int size, const T& fill) {
-        Sequence<T>* new_seq = new Sequence<T>(size);
+        Sequence<T>* new_seq = new ArraySequence<T>(size);
         int n = seq->get_length();
         for (int i = 0; i < size; ++i) {
             if (i < n)

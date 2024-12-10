@@ -4,7 +4,7 @@
 
 // Пример использования стандартной сортировки
 template<typename T>
-void standard_sort(Sequence<T>* seq, int (*cmp)(const T&, const T&)) {
+Sequence<T>* standard_sort(Sequence<T>* seq, int (*cmp)(const T&, const T&)) {
     // Клонируем оригинальную последовательность
     Sequence<T>* sorted_seq = seq->clone();
     

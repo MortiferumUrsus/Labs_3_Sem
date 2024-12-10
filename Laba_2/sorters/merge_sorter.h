@@ -1,14 +1,13 @@
 #ifndef MERGE_SORTER_H
 #define MERGE_SORTER_H
 
+#include "../array_sequence.h"
 #include "../isorter.h"
 #include <iostream>
 
-// Класс сортировщика методом слияния
 template<typename T>
 class MergeSorter : public ISorter<T> {
 public:
-    // Функция сортировки
     Sequence<T>* sort(Sequence<T>* seq, int (*cmp)(const T&, const T&)) override {
         return merge_sorter(seq, 0, seq->get_length() - 1, cmp);
     }
@@ -16,7 +15,7 @@ public:
 private:
     Sequence<T>* merge_sorter(Sequence<T>* seq, int left, int right, int (*cmp)(const T&, const T&)) {
         if (left >= right) {
-            Sequence<T>* single = new Sequence<T>(1);
+            ArraySequence<T>* single = new ArraySequence<T>(1); // Измените на конкретный класс
             single->set(0, seq->get(left));
             return single;
         }
@@ -31,7 +30,7 @@ private:
     Sequence<T>* merge(Sequence<T>* left, Sequence<T>* right, int (*cmp)(const T&, const T&)) {
         int n1 = left->get_length();
         int n2 = right->get_length();
-        Sequence<T>* merged = new Sequence<T>(n1 + n2);
+        ArraySequence<T>* merged = new ArraySequence<T>(n1 + n2); // Измените на конкретный класс
 
         int i = 0, j = 0, k = 0;
         while (i < n1 && j < n2) {
