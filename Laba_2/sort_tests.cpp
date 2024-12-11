@@ -4,7 +4,6 @@
 #include "sorters/batcher_sorter.h"
 #include "sorters/binary_insertion_sorter.h"
 #include "sorters/bubble_sorter.h"
-#include "sorters/counting_sorter.h"
 #include "sorters/heap_sorter.h"
 #include "sorters/insertion_sorter.h"
 #include "sorters/merge_sorter.h"
@@ -15,10 +14,15 @@
 #include "sorters/shell_sorter.h"
 #include "sorters/tree_selection_sorter.h"
 #include "comparator.h"
+#include <iostream>
 #include <fstream>
-#include <chrono>
 #include <vector>
 #include <string>
+#include <chrono>
+#include <future>
+#include <mutex>
+#include <algorithm>
+#include <tuple>
 #include "array_sequence.h"
 
 // Возвращает имя сортировщика
@@ -26,7 +30,6 @@ std::string get_sorter_name(ISorter<Person>* sorter) {
     if (dynamic_cast<BatcherSorter<Person>*>(sorter)) return "Batcher Sort";
     if (dynamic_cast<BinaryInsertionSorter<Person>*>(sorter)) return "Binary Insertion Sort";
     if (dynamic_cast<BubbleSorter<Person>*>(sorter)) return "Bubble Sort";
-    if (dynamic_cast<CountingSorter<Person>*>(sorter)) return "Counting Sort";
     if (dynamic_cast<HeapSorter<Person>*>(sorter)) return "Heap Sort";
     if (dynamic_cast<InsertionSorter<Person>*>(sorter)) return "Insertion Sort";
     if (dynamic_cast<MergeSorter<Person>*>(sorter)) return "Merge Sort";
@@ -40,19 +43,19 @@ std::string get_sorter_name(ISorter<Person>* sorter) {
 }
 
 void run_functional_tests(const std::string& output_file) {
+    std::cout << "Running functional tests...\n";
     std::ofstream csv(output_file);
     csv << "Algorithm,Criteria,Pass/Fail\n";
 
-    // Тестовые данные
-    int test_size = 100000;
+    int test_size = 1000;
+    std::cout << "Functional tests starting with data size: " << test_size << "\n";
+
     Sequence<Person>* test_data = load_data("generated_data.csv", test_size);
 
-    // Список алгоритмов сортировки
     std::vector<ISorter<Person>*> sorters = {
         new BatcherSorter<Person>(),
         new BinaryInsertionSorter<Person>(),
         new BubbleSorter<Person>(),
-        new CountingSorter<Person>(),
         new HeapSorter<Person>(),
         new InsertionSorter<Person>(),
         new MergeSorter<Person>(),
@@ -64,7 +67,6 @@ void run_functional_tests(const std::string& output_file) {
         new TreeSelectionSorter<Person>()
     };
 
-    // Список компараторов
     std::vector<std::pair<int (*)(const Person&, const Person&), std::string>> comparators = {
         {compare_by_first_name, "First Name"},
         {compare_by_last_name, "Last Name"},
@@ -85,10 +87,11 @@ void run_functional_tests(const std::string& output_file) {
 
     for (auto* sorter : sorters) {
         for (const auto& comp : comparators) {
+            std::cout << "Testing " << get_sorter_name(sorter) << " with criteria: " << comp.second << "\n";
+
             try {
                 Sequence<Person>* sorted = sorter->sort(test_data, comp.first);
 
-                // Проверяем, правильно ли отсортированы данные
                 bool is_sorted = true;
                 for (int i = 1; i < sorted->get_length(); ++i) {
                     if (comp.first(sorted->get(i - 1), sorted->get(i)) > 0) {
@@ -101,6 +104,7 @@ void run_functional_tests(const std::string& output_file) {
                 delete sorted;
             } catch (const std::exception& e) {
                 csv << get_sorter_name(sorter) << "," << comp.second << ",Fail\n";
+                std::cerr << "Error during testing: " << e.what() << "\n";
             }
         }
     }
@@ -111,18 +115,22 @@ void run_functional_tests(const std::string& output_file) {
 
     delete test_data;
     csv.close();
+    std::cout << "Functional tests completed. Results saved to functional_tests.csv.\n";
 }
 
-void run_performance_tests(const std::string& output_file) {
+
+// Объявляем mutex
+std::mutex csv_mutex;
+
+void run_load_tests(const std::string& output_file, int (*comparator)(const Person&, const Person&), int data_size) {
+    std::cout << "Running performance tests...\n";
     std::ofstream csv(output_file);
     csv << "Algorithm,Data Size,Time (ms)\n";
 
-    // Список алгоритмов сортировки
     std::vector<ISorter<Person>*> sorters = {
         new BatcherSorter<Person>(),
         new BinaryInsertionSorter<Person>(),
         new BubbleSorter<Person>(),
-        new CountingSorter<Person>(),
         new HeapSorter<Person>(),
         new InsertionSorter<Person>(),
         new MergeSorter<Person>(),
@@ -134,23 +142,44 @@ void run_performance_tests(const std::string& output_file) {
         new TreeSelectionSorter<Person>()
     };
 
-    // Наборы данных разного размера
-    std::vector<int> data_sizes = {1000, 10000, 100000, 1000000};
+    std::vector<std::tuple<std::string, int, double>> results;
 
     for (auto* sorter : sorters) {
-        for (int size : data_sizes) {
-            Sequence<Person>* test_data = load_data("generated_data.csv", size);
+        std::vector<std::future<void>> futures;
+        std::cout << "Testing " << get_sorter_name(sorter) << "\n";
 
-            auto start = std::chrono::high_resolution_clock::now();
-            Sequence<Person>* sorted = sorter->sort(test_data, compare_by_first_name);
-            auto end = std::chrono::high_resolution_clock::now();
+        for (int size = 1; size <= data_size; size++) {
+            futures.push_back(std::async(std::launch::async, [&, sorter, size]() {
+                Sequence<Person>* test_data = load_data("generated_data.csv", size);
 
-            std::chrono::duration<double, std::milli> elapsed = end - start;
-            csv << get_sorter_name(sorter) << "," << size << "," << elapsed.count() << "\n";
+                auto start = std::chrono::high_resolution_clock::now();
+                Sequence<Person>* sorted = sorter->sort(test_data, comparator);
+                auto end = std::chrono::high_resolution_clock::now();
 
-            delete sorted;
-            delete test_data;
+                std::chrono::duration<double, std::milli> elapsed = end - start;
+                {
+                    std::lock_guard<std::mutex> lock(csv_mutex);
+                    results.emplace_back(get_sorter_name(sorter), size, elapsed.count());
+                }
+
+                delete sorted;
+                delete test_data;
+            }));
         }
+
+        for (auto& fut : futures) {
+            fut.get();
+        }
+    }
+
+    // Сортировка результатов по названию алгоритма и размеру данных
+    std::sort(results.begin(), results.end(), [](const auto& a, const auto& b) {
+        return std::tie(std::get<0>(a), std::get<1>(a)) < std::tie(std::get<0>(b), std::get<1>(b));
+    });
+
+    // Запись отсортированных результатов в файл
+    for (const auto& result : results) {
+        csv << std::get<0>(result) << "," << std::get<1>(result) << "," << std::get<2>(result) << "\n";
     }
 
     for (auto* sorter : sorters) {
@@ -158,4 +187,5 @@ void run_performance_tests(const std::string& output_file) {
     }
 
     csv.close();
+    std::cout << "Performance tests completed. Results saved to " << output_file << ".\n";
 }

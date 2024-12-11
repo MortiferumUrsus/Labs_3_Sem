@@ -112,7 +112,7 @@ bool is_digits(const std::string& str) {
     return true;
 }
 
-Sequence<Person>* load_data(const std::string& filename, int size) {
+Sequence<Person>* load_data(const std::string& filename, int size = 0) {
     std::ifstream file(filename);
     if (!file) {
         std::cerr << "File open error: " << filename << std::endl;
@@ -120,8 +120,10 @@ Sequence<Person>* load_data(const std::string& filename, int size) {
     }
 
     ArraySequence<Person>* sequence = new ArraySequence<Person>(0);
+    
     std::string line;
-    std::getline(file, line); // Пропуск заголовка
+    std::getline(file, line); // Skip header
+    int count = 0;
 
     while (std::getline(file, line)) {
         if (line.empty()) continue;
@@ -193,6 +195,11 @@ Sequence<Person>* load_data(const std::string& filename, int size) {
             std::cerr << "Error processing line: " << line << "\n";
             std::cerr << e.what() << "\n";
         }
+        count++;
+        if (size != 0 && count >= size){
+            file.close();
+            return sequence;
+        };
     }
 
     file.close();

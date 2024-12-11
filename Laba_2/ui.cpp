@@ -13,7 +13,6 @@
 #include "sorters/batcher_sorter.h"
 #include "sorters/binary_insertion_sorter.h"
 #include "sorters/bubble_sorter.h"
-#include "sorters/counting_sorter.h"
 #include "sorters/heap_sorter.h"
 #include "sorters/insertion_sorter.h"
 #include "sorters/merge_sorter.h"
@@ -24,7 +23,45 @@
 #include "sorters/shell_sorter.h"
 #include "sorters/tree_selection_sorter.h"
 #include "sort_tests.h"
+#include <cstdlib>
 
+int (*select_comparator(int comparator_choice))(const Person&, const Person&) {
+    switch (comparator_choice) {
+        case 1:
+            return compare_by_first_name;
+        case 2:
+            return compare_by_last_name;
+        case 3:
+            return compare_by_middle_name;
+        case 4:
+            return compare_by_address;
+        case 5:
+            return compare_by_occupation;
+        case 6:
+            return compare_by_gender;
+        case 7:
+            return compare_by_education;
+        case 8:
+            return compare_by_year_of_birth;
+        case 9:
+            return compare_by_number_of_children;
+        case 10:
+            return compare_by_years_of_experience;
+        case 11:
+            return compare_by_height;
+        case 12:
+            return compare_by_weight;
+        case 13:
+            return compare_by_income;
+        case 14:
+            return compare_by_married;
+        case 15:
+            return compare_by_has_car;
+        default:
+            std::cout << "Invalid comparator choice.\n";
+            return nullptr;
+    }
+}
 
 std::string which_algorithm(int algorithm_choice) {
     std::string sorter_name;
@@ -42,30 +79,27 @@ std::string which_algorithm(int algorithm_choice) {
             sorter_name = "Bubble Sort";
             break;
         case 5:
-            sorter_name = "Counting Sort";
-            break;
-        case 6:
             sorter_name = "Heap Sort";
             break;
-        case 7:
+        case 6:
             sorter_name = "Merge Sort";
             break;
-        case 8:
+        case 7:
             sorter_name = "Quadratic Selection Sort";
             break;
-        case 9:
+        case 8:
             sorter_name = "Quick Sort";
             break;
-        case 10:
+        case 9:
             sorter_name = "Selection Sort";
             break;
-        case 11:
+        case 10:
             sorter_name = "Shell Sort";
             break;
-        case 12:
+        case 11:
             sorter_name = "Tree Selection Sort";
             break;
-        case 13:
+        case 12:
             sorter_name = "Batcher Sort";
             break;
         default:
@@ -119,15 +153,14 @@ void start() {
             case 2: std::cout << "Binary Insertion Sort"; break;
             case 3: std::cout << "Shaker Sort"; break;
             case 4: std::cout << "Bubble Sort"; break;
-            case 5: std::cout << "Counting Sort"; break;
-            case 6: std::cout << "Heap Sort"; break;
-            case 7: std::cout << "Merge Sort"; break;
-            case 8: std::cout << "Quadratic Selection Sort"; break;
-            case 9: std::cout << "Quick Sort"; break;
-            case 10: std::cout << "Selection Sort"; break;
-            case 11: std::cout << "Shell Sort"; break;
-            case 12: std::cout << "Tree Selection Sort"; break;
-            case 13: std::cout << "Batcher Sort"; break;
+            case 5: std::cout << "Heap Sort"; break;
+            case 6: std::cout << "Merge Sort"; break;
+            case 7: std::cout << "Quadratic Selection Sort"; break;
+            case 8: std::cout << "Quick Sort"; break;
+            case 9: std::cout << "Selection Sort"; break;
+            case 10: std::cout << "Shell Sort"; break;
+            case 11: std::cout << "Tree Selection Sort"; break;
+            case 12: std::cout << "Batcher Sort"; break;
             default: std::cout << "Unknown"; break;
         }
         std::cout << ")\n";
@@ -151,14 +184,15 @@ void start() {
             default: std::cout << "Unknown"; break;
         }
         std::cout << ")\n";
-        std::cout << "3. Set data size (current: " << data_size << ")\n";
-        std::cout << "4. Generate data\n";
+        std::cout << "3. Set data size and generate (current: " << data_size << ")\n";
+        std::cout << "4. Regenerate data\n";
         std::cout << "5. Sort data and measure time\n";
         std::cout << "6. View data\n";
         std::cout << "7. View sorted data\n";
-        std::cout << "8. Start functional tests\n";
+        std::cout << "8. Start functional tests (to start need minimum data: 1000)\n";
         std::cout << "9. Start load tests\n";
-        std::cout << "10. Exit\n";
+        std::cout << "10. Make plot\n";
+        std::cout << "11. Exit\n";
         std::cout << "Choose an option: ";
 
         int choice;
@@ -171,15 +205,14 @@ void start() {
             std::cout << "2. Binary Insertion Sort\n";
             std::cout << "3. Shaker Sort\n";
             std::cout << "4. Bubble Sort\n";
-            std::cout << "5. Counting Sort\n";
-            std::cout << "6. Heap Sort\n";
-            std::cout << "7. Merge Sort\n";
-            std::cout << "8. Quadratic Selection Sort\n";
-            std::cout << "9. Quick Sort\n";
-            std::cout << "10. Selection Sort\n";
-            std::cout << "11. Shell Sort\n";
-            std::cout << "12. Tree Selection Sort\n";
-            std::cout << "13. Batcher Sort\n";
+            std::cout << "5. Heap Sort\n";
+            std::cout << "6. Merge Sort\n";
+            std::cout << "7. Quadratic Selection Sort\n";
+            std::cout << "8. Quick Sort\n";
+            std::cout << "9. Selection Sort\n";
+            std::cout << "10. Shell Sort\n";
+            std::cout << "11. Tree Selection Sort\n";
+            std::cout << "12. Batcher Sort\n";
             std::cout << "Choose an option: ";
             std::cin >> algorithm_choice;
         } else if (choice == 2) {
@@ -206,6 +239,14 @@ void start() {
             // Установка размера данных
             std::cout << "Enter data size: ";
             std::cin >> data_size;
+            const std::string filename = "generated_data.csv";
+
+            // Проверяем наличие файла и удаляем его, если он существует
+            if (std::filesystem::exists(filename)) {
+                std::filesystem::remove(filename);
+            }
+            data_file = generate_data(data_size);
+            std::cout << "Data successfully generated.\n";
         } else if (choice == 4) {
             const std::string filename = "generated_data.csv";
 
@@ -214,6 +255,7 @@ void start() {
                 std::filesystem::remove(filename);
             }
             data_file = generate_data(data_size);
+            std::cout << "Data successfully generated.\n";
         } else if (choice == 5) {
             if (data_file.empty()) {
                 std::cout << "No data file found. Generate data first.\n";
@@ -241,30 +283,27 @@ void start() {
                     sorter = new BubbleSorter<Person>();
                     break;
                 case 5:
-                    sorter = new CountingSorter<Person>();
-                    break;
-                case 6:
                     sorter = new HeapSorter<Person>();
                     break;
-                case 7:
+                case 6:
                     sorter = new MergeSorter<Person>();
                     break;
-                case 8:
+                case 7:
                     sorter = new QuadraticSelectionSorter<Person>();
                     break;
-                case 9:
+                case 8:
                     sorter = new QuickSorter<Person>();
                     break;
-                case 10:
+                case 9:
                     sorter = new SelectionSorter<Person>();
                     break;
-                case 11:
+                case 10:
                     sorter = new ShellSorter<Person>();
                     break;
-                case 12:
+                case 11:
                     sorter = new TreeSelectionSorter<Person>();
                     break;
-                case 13:
+                case 12:
                     sorter = new BatcherSorter<Person>();
                     break;
                 default:
@@ -273,57 +312,7 @@ void start() {
             }
 
             // Выбор функции сравнения на основе выбора пользователя
-            int (*comparator)(const Person&, const Person&) = nullptr;
-            switch (comparator_choice) {
-                case 1:
-                    comparator = compare_by_first_name;
-                    break;
-                case 2:
-                    comparator = compare_by_last_name;
-                    break;
-                case 3:
-                    comparator = compare_by_middle_name;
-                    break;
-                case 4:
-                    comparator = compare_by_address;
-                    break;
-                case 5:
-                    comparator = compare_by_occupation;
-                    break;
-                case 6:
-                    comparator = compare_by_gender;
-                    break;
-                case 7:
-                    comparator = compare_by_education;
-                    break;
-                case 8:
-                    comparator = compare_by_year_of_birth;
-                    break;
-                case 9:
-                    comparator = compare_by_number_of_children;
-                    break;
-                case 10:
-                    comparator = compare_by_years_of_experience;
-                    break;
-                case 11:
-                    comparator = compare_by_height;
-                    break;
-                case 12:
-                    comparator = compare_by_weight;
-                    break;
-                case 13:
-                    comparator = compare_by_income;
-                    break;
-                case 14:
-                    comparator = compare_by_married;
-                    break;
-                case 15:
-                    comparator = compare_by_has_car;
-                    break;
-                default:
-                    std::cout << "Invalid comparator choice.\n";
-                    continue;
-            }
+            int (*comparator)(const Person&, const Person&) = select_comparator(comparator_choice);
             // Определение имени файла в зависимости от выбранного алгоритма
             std::string sorter_name;
             sorter_name = which_algorithm(algorithm_choice);
@@ -347,7 +336,7 @@ void start() {
 
         } else if (choice == 6) {
             // Вывод данных на экран
-            Sequence<Person>* data = load_data(data_file, data_size);
+            Sequence<Person>* data = load_data(data_file, 20);
             print_data(data);
         } else if (choice == 7) {
             // Вывод отсортированных данных на экран
@@ -356,17 +345,23 @@ void start() {
 
             std::string sort_data_file = "sorted_data_" + sorter_name + ".csv";
             std::cout << sort_data_file << "\n";
-            Sequence<Person>* data = load_data(sort_data_file, data_size);
+            Sequence<Person>* data = load_data(sort_data_file, 20);
             print_data(data);
         } else if (choice == 8) {
-            std::cout << "Running functional tests...\n";
-            run_functional_tests("functional_tests.csv");
-            std::cout << "Functional tests completed. Results saved to functional_tests.csv.\n";
+            if (data_size < 100){
+                std::cout << "To run functional tests need data size 1000 \n";
+                continue;
+            } else {
+                run_functional_tests("functional_tests.csv");
+            }
+            continue;
         } else if (choice == 9) {
-            std::cout << "Running performance tests...\n";
-            run_performance_tests("performance_tests.csv");
-            std::cout << "Performance tests completed. Results saved to performance_tests.csv.\n";
+            int (*comparator)(const Person&, const Person&) = select_comparator(comparator_choice);
+            run_load_tests("load_tests.csv", comparator, data_size);
+            continue;
         } else if (choice == 10) {
+            std::cout << "Run python file: 'plot.py' \n";
+        } else if (choice == 11) {
             // Выход из программы
             break;
         } else {

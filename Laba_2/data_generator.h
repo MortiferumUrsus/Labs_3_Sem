@@ -7,9 +7,9 @@
 #include <iostream>
 
 // Функция для генерации данных
-std::vector<std::string> read_names_from_file(const std::string& filename);
+std::vector<std::string> read_values_from_file(const std::string& filename);
 std::string generate_data(int size);
 Sequence<Person>* load_data(const std::string& filename, int size);
-std::string remove_bom(std::string str);
+bool is_digits(const std::string& str);
 
 #endif // DATA_GENERATOR_H
