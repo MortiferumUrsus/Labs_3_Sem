@@ -44,7 +44,7 @@ void run_functional_tests(const std::string& output_file) {
     csv << "Algorithm,Criteria,Pass/Fail\n";
 
     // Тестовые данные
-    int test_size = 100;
+    int test_size = 100000;
     Sequence<Person>* test_data = load_data("generated_data.csv", test_size);
 
     // Список алгоритмов сортировки
