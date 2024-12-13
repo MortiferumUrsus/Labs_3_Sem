@@ -16,7 +16,7 @@ double load_test_creation(int iterations) {
     T** ptrs = new T*[iterations];
     auto start = high_resolution_clock::now();
     for(int i = 0; i < iterations; ++i){
-        ptrs[i] = new T(); //// Разобрать с этой штукой
+        ptrs[i] = new T(); //// Разобрать с этой штукой!!!
     }
     auto end = high_resolution_clock::now();
     for(int i = 0; i < iterations; ++i) {

@@ -62,7 +62,7 @@ double stl_test_dereference(int iterations) {
 }
 
 std::vector<double> run_stl_tests() {
-    const int iterations = 1000000; // Количество итераций для тестов
+    const int iterations = 1'000'000; // Количество итераций для тестов
     std::vector<double> results;
 
     // Тест создания std::shared_ptr
