@@ -113,6 +113,8 @@ bool is_digits(const std::string& str) {
 }
 
 Sequence<Person>* load_data(const std::string& filename, int size = 0) {
+    ////// Проверка на вместимость в память 
+    /// Сохранять только номер записи в файле и параметр, который сортируем
     std::ifstream file(filename);
     if (!file) {
         std::cerr << "File open error: " << filename << std::endl;

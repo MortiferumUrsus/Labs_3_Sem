@@ -4,6 +4,7 @@
 #include "../isorter.h"
 #include <iostream>
 
+/////////// Проблема реализации, на отсортированной на прямой/обратной последовательности выдаст сложность квадрат
 // Класс сортировщика методом быстрой сортировки (Quick Sort)
 template<typename T>
 class QuickSorter : public ISorter<T> {

@@ -45,4 +45,4 @@ void save_data_to_file(Sequence<T>* sequence, const std::string& filename) {
     std::cout << "Data successfully saved to " << filename << "\n";
 }
 
-#endif
+#endif /// Перенести в data_generator
