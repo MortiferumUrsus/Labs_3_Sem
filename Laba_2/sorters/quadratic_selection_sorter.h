@@ -2,34 +2,33 @@
 #define QUADRATIC_SELECTION_SORTER_H
 
 #include "../isorter.h"
+#include "../pair_sequence.h"
 #include <iostream>
 
-// Класс сортировщика усовершенствованным методом выбором
 template<typename T>
-class QuadraticSelectionSorter : public ISorter<T> {
+class QuadraticSelectionSorter : public ISorter<PairSequence<T>> {
 public:
     // Функция сортировки
-    Sequence<T>* sort(Sequence<T>* seq, int (*cmp)(const T&, const T&)) override {
-        int n = seq->get_length();
-        Sequence<T>* sorted_seq = seq->clone(); // Клонирование последовательности
+    void sort(PairSequence<T>& seq, int (*cmp)(const T&, const T&)) override {
+        int n = seq.get_length();
 
         for (int i = 0; i < n - 1; ++i) {
             int selected_idx = i;
             for (int j = i + 1; j < n; ++j) {
-                if (cmp(sorted_seq->get(j), sorted_seq->get(selected_idx)) < 0) {
+                if (cmp(seq.get_second(j), seq.get_second(selected_idx)) < 0) {
                     selected_idx = j;
                 }
             }
-            // Переместить выбранный элемент на позицию i
             if (selected_idx != i) {
-                T selected = sorted_seq->get(selected_idx);
+                int first = seq.get_first(selected_idx);
+                T selected = seq.get_second(selected_idx);
+
                 for (int k = selected_idx; k > i; --k) {
-                    sorted_seq->set(k, sorted_seq->get(k - 1));
+                    seq.set(k, seq.get_first(k - 1), seq.get_second(k - 1));
                 }
-                sorted_seq->set(i, selected);
+                seq.set(i, first, selected);
             }
         }
-        return sorted_seq;
     }
 };
 

@@ -50,7 +50,7 @@ void run_functional_tests(const std::string& output_file) {
     int test_size = 1000;
     std::cout << "Functional tests starting with data size: " << test_size << "\n";
 
-    Sequence<Person>* test_data = load_data("generated_data.csv", test_size);
+    Sequence<Person>* test_data = load_data_full("generated_data.csv", test_size);
 
     std::vector<ISorter<Person>*> sorters = {
         new BatcherSorter<Person>(),
@@ -90,7 +90,8 @@ void run_functional_tests(const std::string& output_file) {
             std::cout << "Testing " << get_sorter_name(sorter) << " with criteria: " << comp.second << "\n";
 
             try {
-                Sequence<Person>* sorted = sorter->sort(test_data, comp.first);
+                Sequence<Person>* sorted = test_data;
+                sorter->sort(*sorted, comp.first);
 
                 bool is_sorted = true;
                 for (int i = 1; i < sorted->get_length(); ++i) {
@@ -122,11 +123,12 @@ void run_functional_tests(const std::string& output_file) {
 // Объявляем mutex
 std::mutex csv_mutex;
 
-void run_load_tests(const std::string& output_file, int (*comparator)(const Person&, const Person&), int data_size) {
+void run_load_tests(const std::string& output_file, int (*comparator)(const Person&, const Person&), int data_size, const std::string& param) {
     std::cout << "Running performance tests...\n";
     std::ofstream csv(output_file);
     csv << "Algorithm,Data Size,Time (ms)\n";
 
+    // Список сортировок
     std::vector<ISorter<Person>*> sorters = {
         new BatcherSorter<Person>(),
         new BinaryInsertionSorter<Person>(),
@@ -142,34 +144,51 @@ void run_load_tests(const std::string& output_file, int (*comparator)(const Pers
         new TreeSelectionSorter<Person>()
     };
 
+    // Вектор для результатов
     std::vector<std::tuple<std::string, int, double>> results;
 
-    for (auto* sorter : sorters) {
+    // Перебираем размеры данных
+    for (int size = 1; size <= data_size; ++size) {
+        std::cout << "Processing data size: " << size << "\n";
+
+        // Загружаем данные один раз для текущего размера
+        Sequence<Person>* test_data_full = load_data_by_param("generated_data.csv", param, size);
+
         std::vector<std::future<void>> futures;
-        std::cout << "Testing " << get_sorter_name(sorter) << "\n";
 
-        for (int size = 1; size <= data_size; size++) {
-            futures.push_back(std::async(std::launch::async, [&, sorter, size]() {
-                Sequence<Person>* test_data = load_data("generated_data.csv", size);
+        // Для каждой сортировки
+        for (auto* sorter : sorters) {
+            futures.push_back(std::async(std::launch::async, [&, sorter, test_data_full, size]() {
+                // Копируем данные для сортировки
+                auto* test_data = new ArraySequence<Person>(0);
+                for (int i = 0; i < test_data_full->get_length(); ++i) {
+                    test_data->append(test_data_full->get(i));
+                }
 
+                // Засекаем время
                 auto start = std::chrono::high_resolution_clock::now();
-                Sequence<Person>* sorted = sorter->sort(test_data, comparator);
+                sorter->sort(*test_data, comparator);
                 auto end = std::chrono::high_resolution_clock::now();
 
+                // Рассчитываем время выполнения
                 std::chrono::duration<double, std::milli> elapsed = end - start;
+
+                // Сохраняем результат
                 {
                     std::lock_guard<std::mutex> lock(csv_mutex);
                     results.emplace_back(get_sorter_name(sorter), size, elapsed.count());
                 }
 
-                delete sorted;
                 delete test_data;
             }));
         }
 
+        // Ожидание завершения всех задач
         for (auto& fut : futures) {
             fut.get();
         }
+
+        delete test_data_full; // Освобождаем память
     }
 
     // Сортировка результатов по названию алгоритма и размеру данных
@@ -182,6 +201,7 @@ void run_load_tests(const std::string& output_file, int (*comparator)(const Pers
         csv << std::get<0>(result) << "," << std::get<1>(result) << "," << std::get<2>(result) << "\n";
     }
 
+    // Освобождаем сортировщики
     for (auto* sorter : sorters) {
         delete sorter;
     }

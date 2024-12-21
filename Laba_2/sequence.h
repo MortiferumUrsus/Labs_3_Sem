@@ -1,6 +1,8 @@
 #ifndef SEQUENCE_H
 #define SEQUENCE_H
 
+#include <cstddef>   
+
 // Абстрактный класс последовательности
 template<typename T>
 class Sequence {
@@ -10,6 +12,8 @@ public:
     virtual int get_length() const = 0; // Получить длину последовательности
     virtual Sequence<T>* clone() const = 0; // Клонировать последовательность
     virtual ~Sequence() = default; // Виртуальный деструктор
+    void erase(size_t pos);
+    void push_back(const T& value);
 };
 
 #endif // SEQUENCE_H

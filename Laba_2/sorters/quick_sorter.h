@@ -2,47 +2,58 @@
 #define QUICK_SORTER_H
 
 #include "../isorter.h"
+#include "../pair_sequence.h"
 #include <iostream>
 
-/////////// Проблема реализации, на отсортированной на прямой/обратной последовательности выдаст сложность квадрат
 // Класс сортировщика методом быстрой сортировки (Quick Sort)
 template<typename T>
-class QuickSorter : public ISorter<T> {
+class QuickSorter : public ISorter<PairSequence<T>> {
 public:
     // Функция сортировки
-    Sequence<T>* sort(Sequence<T>* seq, int (*cmp)(const T&, const T&)) override {
-        Sequence<T>* sorted_seq = seq->clone(); // Клонирование последовательности
-        quick_sorter(sorted_seq, 0, sorted_seq->get_length() - 1, cmp);
-        return sorted_seq;
+    void sort(PairSequence<T>& seq, int (*cmp)(const T&, const T&)) override {
+        quick_sorter(seq, 0, seq.get_length() - 1, cmp);
     }
 
 private:
-    void quick_sorter(Sequence<T>* seq, int low, int high, int (*cmp)(const T&, const T&)) {
+    void quick_sorter(PairSequence<T>& seq, int low, int high, int (*cmp)(const T&, const T&)) {
         if (low < high) {
-            int pi = partition(seq, low, high, cmp);
-            quick_sorter(seq, low, pi - 1, cmp);
-            quick_sorter(seq, pi + 1, high, cmp);
+            int pivot_index = partition(seq, low, high, cmp);
+            quick_sorter(seq, low, pivot_index - 1, cmp);
+            quick_sorter(seq, pivot_index + 1, high, cmp);
         }
     }
 
-    int partition(Sequence<T>* seq, int low, int high, int (*cmp)(const T&, const T&)) {
-        T pivot = seq->get(high); // Пивот
+    int partition(PairSequence<T>& seq, int low, int high, int (*cmp)(const T&, const T&)) {
+        // Используем средний элемент как пивот для улучшения стабильности
+        int pivot_index = low + (high - low) / 2;
+
+        // Перемещаем пивот в конец
+        swap(seq, pivot_index, high);
+
+        // Берём пивот
+        T pivot_value = seq.get_second(high);
         int i = low - 1; // Индекс меньшего элемента
 
-        for (int j = low; j <= high - 1; ++j) {
-            if (cmp(seq->get(j), pivot) < 0) {
-                i++;
-                // Обмен
-                T temp = seq->get(i);
-                seq->set(i, seq->get(j));
-                seq->set(j, temp);
+        for (int j = low; j < high; ++j) {
+            if (cmp(seq.get_second(j), pivot_value) <= 0) {
+                ++i;
+                swap(seq, i, j); // Обмен местами текущего элемента с элементом seq[i]
             }
         }
-        // Обмен с пивотом
-        T temp = seq->get(i + 1);
-        seq->set(i + 1, seq->get(high));
-        seq->set(high, temp);
-        return (i + 1);
+
+        // Помещаем пивот на правильное место
+        swap(seq, i + 1, high);
+
+        return i + 1; // Возвращаем индекс пивота
+    }
+
+    // Вспомогательная функция для обмена пар местами
+    void swap(PairSequence<T>& seq, int index1, int index2) {
+        int temp_first = seq.get_first(index1);
+        T temp_second = seq.get_second(index1);
+
+        seq.set(index1, seq.get_first(index2), seq.get_second(index2));
+        seq.set(index2, temp_first, temp_second);
     }
 };
 

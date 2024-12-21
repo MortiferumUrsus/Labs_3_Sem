@@ -10,6 +10,6 @@
 void run_functional_tests(const std::string& output_file);
 
 // Функция для запуска нагрузочных тестов
-void run_load_tests(const std::string& output_file, int (*comparator)(const Person&, const Person&), int data_size);
+void run_load_tests(const std::string& output_file, int (*comparator)(const Person&, const Person&), int data_size, std::string param);
 
 #endif // SORT_TESTS_H

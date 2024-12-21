@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
 # Загрузите данные из CSV
 file_path = 'load_tests.csv'

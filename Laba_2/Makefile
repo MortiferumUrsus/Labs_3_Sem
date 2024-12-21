@@ -11,7 +11,7 @@ HDR = array_sequence.h sorters/binary_insertion_sorter.h comparator.h data_gener
       sorters/insertion_sorter.h isorter.h sequence.h sorters/shaker_sorter.h smrt_ptr.h ui.h \
       sorters/batcher_sorter.h sorters/bubble_sorter.h sorters/heap_sorter.h \
       sorters/merge_sorter.h sorters/quadratic_selection_sorter.h sorters/quick_sorter.h \
-      sorters/selection_sorter.h sorters/shell_sorter.h sorters/stl_sort.h sorters/tree_selection_sorter.h \
+      sorters/selection_sorter.h sorters/shell_sorter.h sorters/tree_selection_sorter.h \
 	  sort_tests.h
 
 # Имя итогового исполняемого файла

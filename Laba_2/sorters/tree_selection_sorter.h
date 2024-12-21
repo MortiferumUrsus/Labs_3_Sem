@@ -2,41 +2,38 @@
 #define TREE_SELECTION_SORTER_H
 
 #include "../isorter.h"
-#include <iostream>
+#include "../pair_sequence.h"
 #include <set>
 
-// Класс сортировщика с использованием бинарного дерева (например, std::set)
+// Класс сортировщика с использованием бинарного дерева (std::multiset)
 template<typename T>
-class TreeSelectionSorter : public ISorter<T> {
+class TreeSelectionSorter : public ISorter<PairSequence<T>> {
 public:
-    // Функция сортировки
-    Sequence<T>* sort(Sequence<T>* seq, int (*cmp)(const T&, const T&)) override {
-        // Используем мультисет для поддержки дубликатов
+    void sort(PairSequence<T>& seq, int (*cmp)(const T&, const T&)) override {
+        // Используем std::multiset для хранения индексов и значений
         struct Compare {
             int (*cmp_func)(const T&, const T&);
-            bool operator()(const T& a, const T& b) const {
-                return cmp_func(a, b) < 0;
+            bool operator()(const std::pair<int, T>& a, const std::pair<int, T>& b) const {
+                int result = cmp_func(a.second, b.second);
+                // Если значения равны, сравниваем индексы для стабильности сортировки
+                return result < 0 || (result == 0 && a.first < b.first);
             }
         };
 
-        Compare comp;
-        comp.cmp_func = cmp;
-        std::multiset<T, Compare> tree(comp);
+        Compare comp = {cmp};
+        std::multiset<std::pair<int, T>, Compare> tree(comp);
 
-        // Вставляем все элементы в дерево
-        int n = seq->get_length();
+        // Вставляем пары (номер строки, значение) в дерево
+        int n = seq.get_length();
         for (int i = 0; i < n; ++i) {
-            tree.insert(seq->get(i));
+            tree.emplace(seq.get_first(i), seq.get_second(i));
         }
 
-        // Создаем отсортированную последовательность
-        Sequence<T>* sorted_seq = new ArraySequence<T>(n);
+        // Перезаписываем seq в отсортированном порядке
         int index = 0;
         for (const auto& elem : tree) {
-            sorted_seq->set(index++, elem);
+            seq.set(index++, elem.first, elem.second);
         }
-
-        return sorted_seq;
     }
 };
 

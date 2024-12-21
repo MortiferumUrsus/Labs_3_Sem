@@ -1,5 +1,6 @@
 #include "data_generator.h"
 #include "array_sequence.h"
+#include "pair_sequence.h"
 #include <cstdlib>
 #include <ctime>
 #include <string>
@@ -7,6 +8,8 @@
 #include <fstream>
 #include <vector>
 #include <sstream>
+#include <unordered_map>
+#include <variant>
 
 // Функция для чтения имен из файла
 std::vector<std::string> read_values_from_file(const std::string& filename) {
@@ -112,9 +115,7 @@ bool is_digits(const std::string& str) {
     return true;
 }
 
-Sequence<Person>* load_data(const std::string& filename, int size = 0) {
-    ////// Проверка на вместимость в память 
-    /// Сохранять только номер записи в файле и параметр, который сортируем
+Sequence<Person>* load_data_full(const std::string& filename, int size = 0) {
     std::ifstream file(filename);
     if (!file) {
         std::cerr << "File open error: " << filename << std::endl;
@@ -206,4 +207,100 @@ Sequence<Person>* load_data(const std::string& filename, int size = 0) {
 
     file.close();
     return sequence;
+}
+
+PairSequence<std::variant<int, float, std::string, bool>>* load_data_by_param(
+    const std::string& filename, const std::string& param, int size) {
+    
+    auto* sequence = new PairSequence<std::variant<int, float, std::string, bool>>();
+
+    // Открытие файла
+    std::ifstream file(filename);
+    if (!file) {
+        std::cerr << "Error opening file: " << filename << "\n";
+        return nullptr;
+    }
+
+    std::string line;
+    std::getline(file, line); // Пропуск заголовка
+    int index = 0;
+
+    while (std::getline(file, line) && (size == 0 || index < size)) {
+        std::istringstream stream(line);
+        std::string value;
+
+        if (param == "weight") {
+            std::getline(stream, value, ','); // Пропускаем ненужные поля
+            std::getline(stream, value, ',');
+            float weight = std::stof(value);
+            sequence->append(index, weight);
+        } else if (param == "first_name") {
+            std::getline(stream, value, ',');
+            sequence->append(index, value);
+        }
+        // Добавьте другие параметры аналогично
+        ++index;
+    }
+
+    file.close();
+    return sequence;
+}
+
+template<typename T>
+void save_data_to_file(
+    const PairSequence<std::variant<int, float, std::string, bool>>* data,
+    const std::string& filename) {
+    
+    std::ofstream file(filename);
+    if (!file) {
+        std::cerr << "Error opening file: " << filename << "\n";
+        return;
+    }
+
+    for (int i = 0; i < data->get_length(); ++i) {
+        auto pair = data->get(i);
+        file << pair.get_first() << ",";
+        if (std::holds_alternative<int>(pair.get_second())) {
+            file << std::get<int>(pair.get_second());
+        } else if (std::holds_alternative<float>(pair.get_second())) {
+            file << std::get<float>(pair.get_second());
+        } else if (std::holds_alternative<std::string>(pair.get_second())) {
+            file << std::get<std::string>(pair.get_second());
+        } else if (std::holds_alternative<bool>(pair.get_second())) {
+            file << (std::get<bool>(pair.get_second()) ? "true" : "false");
+        }
+        file << "\n";
+    }
+
+    file.close();
+}
+
+
+template<typename T>
+void save_sorted_data(const PairSequence<T>* sequence, const std::string& input_file, const std::string& output_file) {
+    std::ifstream input(input_file);
+    if (!input) {
+        throw std::runtime_error("Error opening input file: " + input_file);
+    }
+
+    std::ofstream output(output_file);
+    if (!output) {
+        throw std::runtime_error("Error opening output file: " + output_file);
+    }
+
+    // Считываем все строки из входного файла
+    std::vector<std::string> all_lines;
+    std::string line;
+    while (std::getline(input, line)) {
+        all_lines.push_back(line);
+    }
+
+    // Пишем заголовок
+    output << all_lines[0] << "\n";
+
+    // Пишем строки в порядке отсортированных индексов
+    for (int i = 0; i < sequence->get_length(); ++i) {
+        int index = sequence->get_first(i);
+        output << all_lines[index + 1] << "\n"; // +1 чтобы учесть заголовок
+    }
 }

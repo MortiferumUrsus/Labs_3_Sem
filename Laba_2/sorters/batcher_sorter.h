@@ -2,45 +2,32 @@
 #define BATCHER_SORTER_H
 
 #include "../isorter.h"
+#include "../pair_sequence.h"
 #include <iostream>
-#include <vector>
-#include "../array_sequence.h"
 
 template<typename T>
-class BatcherSorter : public ISorter<T> {
+class BatcherSorter : public ISorter<PairSequence<T>> {
 public:
-    Sequence<T>* sort(Sequence<T>* seq, int (*cmp)(const T&, const T&)) override {
-        int n = seq->get_length();
+    void sort(PairSequence<T>& seq, int (*cmp)(const T&, const T&)) override {
+        int n = seq.get_length();
         int m = 1;
         while (m < n) m <<= 1;
-        Sequence<T>* extended_seq = extend_sequence(seq, m, T());
-        bitonic_sort(extended_seq, 0, m, true, cmp);
-        return trim_sequence(extended_seq, n);
+
+        // Расширение последовательности до степени двойки
+        for (int i = n; i < m; ++i) {
+            seq.append(seq.get_length(), T());
+        }
+
+        bitonic_sort(seq, 0, m, true, cmp);
+
+        // Удаление лишних элементов
+        while (seq.get_length() > n) {
+            seq.erase(seq.get_length() - 1);
+        }
     }
 
 private:
-    Sequence<T>* extend_sequence(Sequence<T>* seq, int size, const T& fill) {
-        Sequence<T>* new_seq = new ArraySequence<T>(size);
-        int n = seq->get_length();
-        for (int i = 0; i < n; ++i) {
-            new_seq->set(i, seq->get(i));
-        }
-        for (int i = n; i < size; ++i) {
-            new_seq->set(i, fill);
-        }
-        return new_seq;  // Не удаляем исходную последовательность
-    }
-
-    Sequence<T>* trim_sequence(Sequence<T>* seq, int size) {
-        Sequence<T>* new_seq = new ArraySequence<T>(size);
-        for (int i = 0; i < size; ++i) {
-            new_seq->set(i, seq->get(i));
-        }
-        delete seq;  // Удаляем расширенную последовательность
-        return new_seq;
-    }
-
-    void bitonic_sort(Sequence<T>* seq, int low, int cnt, bool dir, int (*cmp)(const T&, const T&)) {
+    void bitonic_sort(PairSequence<T>& seq, int low, int cnt, bool dir, int (*cmp)(const T&, const T&)) {
         if (cnt > 1) {
             int k = cnt / 2;
             bitonic_sort(seq, low, k, true, cmp);
@@ -49,7 +36,7 @@ private:
         }
     }
 
-    void bitonic_merge(Sequence<T>* seq, int low, int cnt, bool dir, int (*cmp)(const T&, const T&)) {
+    void bitonic_merge(PairSequence<T>& seq, int low, int cnt, bool dir, int (*cmp)(const T&, const T&)) {
         if (cnt > 1) {
             int k = cnt / 2;
             for (int i = low; i < low + k; ++i) {
@@ -60,11 +47,14 @@ private:
         }
     }
 
-    void compare_and_swap(Sequence<T>* seq, int i, int j, bool dir, int (*cmp)(const T&, const T&)) {
-        if (dir == (cmp(seq->get(i), seq->get(j)) > 0)) {
-            T temp = seq->get(i);
-            seq->set(i, seq->get(j));
-            seq->set(j, temp);
+    void compare_and_swap(PairSequence<T>& seq, int i, int j, bool dir, int (*cmp)(const T&, const T&)) {
+        if (dir == (cmp(seq.get_second(i), seq.get_second(j)) > 0)) {
+            // Меняем местами оба элемента пары
+            int temp_first = seq.get_first(i);
+            T temp_second = seq.get_second(i);
+
+            seq.set(i, seq.get_first(j), seq.get_second(j));
+            seq.set(j, temp_first, temp_second);
         }
     }
 };

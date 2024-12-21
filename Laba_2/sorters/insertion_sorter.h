@@ -1,30 +1,17 @@
-#ifndef INSERTION_SORTER_H
-#define INSERTION_SORTER_H
-
-#include "../isorter.h"
-#include <iostream>
-
-
-// Класс сортировщика методом простых вставок
 template<typename T>
-class InsertionSorter : public ISorter<T> {
+class InsertionSorter : public ISorter<PairSequence<T>> {
 public:
-    // Функция сортировки
-    Sequence<T>* sort(Sequence<T>* seq, int (*cmp)(const T&, const T&)) override {
-        int n = seq->get_length();
-        Sequence<T>* sorted_seq = seq->clone(); // Клонирование последовательности
-        
+    void sort(PairSequence<T>& seq, int (*cmp)(const T&, const T&)) override {
+        int n = seq.get_length();
         for (int i = 1; i < n; ++i) {
-            T key = sorted_seq->get(i);
+            auto key = seq.get(i);
             int j = i - 1;
-            while (j >= 0 && cmp(sorted_seq->get(j), key) > 0) {
-                sorted_seq->set(j + 1, sorted_seq->get(j));
-                j = j - 1;
+
+            while (j >= 0 && cmp(seq.get(j).get_second(), key.get_second()) > 0) {
+                seq.set(j + 1, seq.get(j));
+                --j;
             }
-            sorted_seq->set(j + 1, key);
+            seq.set(j + 1, key);
         }
-        return sorted_seq;
     }
 };
-
-#endif // INSERTION_SORTER_H

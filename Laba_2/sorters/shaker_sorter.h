@@ -2,35 +2,38 @@
 #define SHAKER_SORTER_H
 
 #include "../isorter.h"
+#include "../pair_sequence.h"
 
 // Класс шейкерной сортировки
 template<typename T>
-class ShakerSorter : public ISorter<T> {
+class ShakerSorter : public ISorter<PairSequence<T>> {
 public:
     // Функция сортировки
-    Sequence<T>* sort(Sequence<T>* seq, int (*cmp)(const T&, const T&)) override {
-        Sequence<T>* sorted_seq = seq->clone();
+    void sort(PairSequence<T>& seq, int (*cmp)(const T&, const T&)) override {
         int left = 0;
-        int right = sorted_seq->get_length() - 1;
+        int right = seq.get_length() - 1;
         while (left <= right) {
             for (int i = left; i < right; ++i) {
-                if (cmp(sorted_seq->get(i), sorted_seq->get(i + 1)) > 0) {
-                    T temp = sorted_seq->get(i);
-                    sorted_seq->set(i, sorted_seq->get(i +1));
-                    sorted_seq->set(i + 1, temp);
+                if (cmp(seq.get_second(i), seq.get_second(i + 1)) > 0) {
+                    int first = seq.get_first(i);
+                    T second = seq.get_second(i);
+
+                    seq.set(i, seq.get_second(i+1), seq.get_second(i +1));
+                    seq.set(i + 1, first, second);
                 }
             }
             right--;
             for (int i = right; i > left; --i) {
-                if (cmp(sorted_seq->get(i -1), sorted_seq->get(i)) > 0) {
-                    T temp = sorted_seq->get(i);
-                    sorted_seq->set(i, sorted_seq->get(i -1));
-                    sorted_seq->set(i -1, temp);
+                if (cmp(seq.get(i -1), seq.get(i)) > 0) {
+                    int first = seq.get_first(i);
+                    T second = seq.get_second(i);
+
+                    seq.set(i, seq.get_first(i -1), seq.get_second(i -1));
+                    seq.set(i -1, first, second);
                 }
             }
             left++;
         }
-        return sorted_seq;
     }
 };
 

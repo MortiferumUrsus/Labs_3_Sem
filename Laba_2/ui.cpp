@@ -9,7 +9,6 @@
 #include "comparator.h"
 #include <chrono>
 #include <filesystem>
-#include "data_utils.h"
 #include "sorters/batcher_sorter.h"
 #include "sorters/binary_insertion_sorter.h"
 #include "sorters/bubble_sorter.h"
@@ -23,7 +22,9 @@
 #include "sorters/shell_sorter.h"
 #include "sorters/tree_selection_sorter.h"
 #include "sort_tests.h"
+#include "pair_sequence.h"
 #include <cstdlib>
+#include <variant>
 
 int (*select_comparator(int comparator_choice))(const Person&, const Person&) {
     switch (comparator_choice) {
@@ -107,6 +108,61 @@ std::string which_algorithm(int algorithm_choice) {
             break;
     }
     return sorter_name;
+}
+
+std::string which_comparator(int comparator_choice) {
+    std::string comparator_name;
+    switch (comparator_choice) {
+        case 1:
+            comparator_name = "First Name";
+            break;
+        case 2:
+            comparator_name = "Last Name";
+            break;
+        case 3:
+            comparator_name = "Middle Name";
+            break;
+        case 4:
+            comparator_name = "Address";
+            break;
+        case 5:
+            comparator_name = "Occupation";
+            break;
+        case 6:
+            comparator_name = "Gender";
+            break;
+        case 7:
+            comparator_name = "Education";
+            break;
+        case 8:
+            comparator_name = "Year of Birth";
+            break;
+        case 9:
+            comparator_name = "Number of Children";
+            break;
+        case 10:
+            comparator_name = "Years of Experience";
+            break;
+        case 11:
+            comparator_name = "Height";
+            break;
+        case 12:
+            comparator_name = "Weight";
+            break;
+        case 13:
+            comparator_name = "Income";
+            break;
+        case 14:
+            comparator_name = "Married";
+            break;
+        case 15:
+            comparator_name = "Has Car";
+            break;
+        default:
+            comparator_name = "Unknown";
+            break;
+    }
+    return comparator_name;
 }
 
 void print_data(Sequence<Person>* data){
@@ -262,54 +318,57 @@ void start() {
                 continue;
             }
             if (data) delete data;
-            data = load_data(data_file, data_size);
+            std::string param = which_comparator(comparator_choice);
+            using DataVariant = std::variant<bool, int, float, std::string>;
+            PairSequence<std::variant<int, float, std::string, bool>>* data = load_data_by_param(data_file, param, data_size);
             if (!data) {
                 std::cout << "Failed to load data.\n";
                 continue;
             }
             // Создание сортировщика на основе выбора пользователя
-            ISorter<Person>* sorter = nullptr;
+            ISorter<PairSequence<std::variant<int, float, std::string, bool>>>* sorter = nullptr;
             switch (algorithm_choice) {
                 case 1:
-                    sorter = new InsertionSorter<Person>();
+                    sorter = new InsertionSorter<std::variant<int, float, std::string, bool>>();
                     break;
                 case 2:
-                    sorter = new BinaryInsertionSorter<Person>();
+                    sorter = new BinaryInsertionSorter<std::variant<int, float, std::string, bool>>();
                     break;
                 case 3:
-                    sorter = new ShakerSorter<Person>();
+                    sorter = new ShakerSorter<std::variant<int, float, std::string, bool>>();
                     break;
                 case 4:
-                    sorter = new BubbleSorter<Person>();
+                    sorter = new BubbleSorter<std::variant<int, float, std::string, bool>>();
                     break;
                 case 5:
-                    sorter = new HeapSorter<Person>();
+                    sorter = new HeapSorter<std::variant<int, float, std::string, bool>>();
                     break;
                 case 6:
-                    sorter = new MergeSorter<Person>();
+                    sorter = new MergeSorter<std::variant<int, float, std::string, bool>>();
                     break;
                 case 7:
-                    sorter = new QuadraticSelectionSorter<Person>();
+                    sorter = new QuadraticSelectionSorter<std::variant<int, float, std::string, bool>>();
                     break;
                 case 8:
-                    sorter = new QuickSorter<Person>();
+                    sorter = new QuickSorter<std::variant<int, float, std::string, bool>>();
                     break;
                 case 9:
-                    sorter = new SelectionSorter<Person>();
+                    sorter = new SelectionSorter<std::variant<int, float, std::string, bool>>();
                     break;
                 case 10:
-                    sorter = new ShellSorter<Person>();
+                    sorter = new ShellSorter<std::variant<int, float, std::string, bool>>();
                     break;
                 case 11:
-                    sorter = new TreeSelectionSorter<Person>();
+                    sorter = new TreeSelectionSorter<std::variant<int, float, std::string, bool>>();
                     break;
                 case 12:
-                    sorter = new BatcherSorter<Person>();
+                    sorter = new BatcherSorter<std::variant<int, float, std::string, bool>>();
                     break;
                 default:
-                    std::cout << "Invalid algorithm choice.\n";
-                    continue;
+                    std::cerr << "Invalid algorithm choice.\n";
+                    return;
             }
+
 
             // Выбор функции сравнения на основе выбора пользователя
             int (*comparator)(const Person&, const Person&) = select_comparator(comparator_choice);
@@ -321,22 +380,22 @@ void start() {
 
             std::cout << "Sorting...\n";
             auto start = std::chrono::high_resolution_clock::now();
-            Sequence<Person>* sorted_data = sorter->sort(data, comparator);
+            sorter->sort(*data, comparator);
             auto end = std::chrono::high_resolution_clock::now();
 
-            save_data_to_file(sorted_data, output_filename);
+            save_data_to_file(data, output_filename);
 
             std::chrono::duration<double, std::milli> elapsed = end - start;
             std::cout << "Sorting completed in " << elapsed.count() << " milliseconds.\n";
 
 
             // Очистка памяти
-            delete sorted_data;
+            delete data;
             delete sorter;
 
         } else if (choice == 6) {
             // Вывод данных на экран
-            Sequence<Person>* data = load_data(data_file, 20);
+            Sequence<Person>* data = load_data_full(data_file, 20);
             print_data(data);
         } else if (choice == 7) {
             // Вывод отсортированных данных на экран
@@ -345,19 +404,20 @@ void start() {
 
             std::string sort_data_file = "sorted_data_" + sorter_name + ".csv";
             std::cout << sort_data_file << "\n";
-            Sequence<Person>* data = load_data(sort_data_file, 20);
+            Sequence<Person>* data = load_data_full(sort_data_file, 20);
             print_data(data);
         } else if (choice == 8) {
             if (data_size < 100){
                 std::cout << "To run functional tests need data size 1000 \n";
                 continue;
-            } else {
+            } else {;
                 run_functional_tests("functional_tests.csv");
             }
             continue;
         } else if (choice == 9) {
             int (*comparator)(const Person&, const Person&) = select_comparator(comparator_choice);
-            run_load_tests("load_tests.csv", comparator, data_size);
+            std::string param = which_comparator(comparator_choice);
+            run_load_tests("load_tests.csv", comparator, data_size, param);
             continue;
         } else if (choice == 10) {
             std::cout << "Run python file: 'plot.py' \n";

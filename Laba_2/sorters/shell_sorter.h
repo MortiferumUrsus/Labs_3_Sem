@@ -2,30 +2,31 @@
 #define SHELL_SORTER_H
 
 #include "../isorter.h"
+#include "../pair_sequence.h"
 #include <iostream>
 
 // Класс сортировщика методом Шелла
 template<typename T>
-class ShellSorter : public ISorter<T> {
+class ShellSorter : public ISorter<PairSequence<T>> {
 public:
     // Функция сортировки
-    Sequence<T>* sort(Sequence<T>* seq, int (*cmp)(const T&, const T&)) override {
-        int n = seq->get_length();
-        Sequence<T>* sorted_seq = seq->clone(); // Клонирование последовательности
+    void sort(PairSequence<T>& seq, int (*cmp)(const T&, const T&)) override {
+        int n = seq.get_length();
 
         // Начальный интервал
         for (int gap = n / 2; gap > 0; gap /= 2) {
             // Делим на подмассивы по текущему интервалу
             for (int i = gap; i < n; ++i) {
-                T temp = sorted_seq->get(i);
+                int first = seq.get_first(i);
+                T second = seq.get_second(i);
+
                 int j;
-                for (j = i; j >= gap && cmp(sorted_seq->get(j - gap), temp) > 0; j -= gap) {
-                    sorted_seq->set(j, sorted_seq->get(j - gap));
+                for (j = i; j >= gap && cmp(seq.get_second(j - gap), second) > 0; j -= gap) {
+                    seq.set(j, seq.get_first(j - gap), seq.get_second(j - gap));
                 }
-                sorted_seq->set(j, temp);
+                seq.set(j, first, second);
             }
         }
-        return sorted_seq;
     }
 };
 

@@ -3,53 +3,68 @@
 
 #include "../array_sequence.h"
 #include "../isorter.h"
+#include "../pair_sequence.h"
 #include <iostream>
 
 template<typename T>
-class MergeSorter : public ISorter<T> {
+class MergeSorter : public ISorter<PairSequence<T>> {
 public:
-    Sequence<T>* sort(Sequence<T>* seq, int (*cmp)(const T&, const T&)) override {
-        return merge_sorter(seq, 0, seq->get_length() - 1, cmp);
+    void sort(PairSequence<T>& seq, int (*cmp)(const T&, const T&)) override {
+        merge_sort(seq, 0, seq.get_length() - 1, cmp);
     }
 
 private:
-    Sequence<T>* merge_sorter(Sequence<T>* seq, int left, int right, int (*cmp)(const T&, const T&)) {
-        if (left >= right) {
-            ArraySequence<T>* single = new ArraySequence<T>(1); // Измените на конкретный класс
-            single->set(0, seq->get(left));
-            return single;
-        }
+    void merge_sort(PairSequence<T>& seq, int left, int right, int (*cmp)(const T&, const T&)) {
+        if (left >= right) return;
 
         int mid = left + (right - left) / 2;
-        Sequence<T>* left_sorted = merge_sorter(seq, left, mid, cmp);
-        Sequence<T>* right_sorted = merge_sorter(seq, mid + 1, right, cmp);
-
-        return merge(left_sorted, right_sorted, cmp);
+        merge_sort(seq, left, mid, cmp);
+        merge_sort(seq, mid + 1, right, cmp);
+        merge(seq, left, mid, right, cmp);
     }
 
-    Sequence<T>* merge(Sequence<T>* left, Sequence<T>* right, int (*cmp)(const T&, const T&)) {
-        int n1 = left->get_length();
-        int n2 = right->get_length();
-        ArraySequence<T>* merged = new ArraySequence<T>(n1 + n2); // Измените на конкретный класс
+    void merge(PairSequence<T>& seq, int left, int mid, int right, int (*cmp)(const T&, const T&)) {
+        int n1 = mid - left + 1;
+        int n2 = right - mid;
 
-        int i = 0, j = 0, k = 0;
+        // Создаём временные PairSequence для левой и правой части
+        PairSequence<T> left_seq, right_seq;
+
+        // Копируем данные из seq в временные последовательности
+        for (int i = 0; i < n1; ++i) {
+            left_seq.append(seq.get_first(left + i), seq.get_second(left + i));
+        }
+        for (int j = 0; j < n2; ++j) {
+            right_seq.append(seq.get_first(mid + 1 + j), seq.get_second(mid + 1 + j));
+        }
+
+        int i = 0, j = 0, k = left;
+
+        // Слияние двух отсортированных массивов
         while (i < n1 && j < n2) {
-            if (cmp(left->get(i), right->get(j)) <= 0) {
-                merged->set(k++, left->get(i++));
+            if (cmp(left_seq.get_second(i), right_seq.get_second(j)) <= 0) {
+                seq.set(k, left_seq.get_first(i), left_seq.get_second(i));
+                ++i;
             } else {
-                merged->set(k++, right->get(j++));
+                seq.set(k, right_seq.get_first(j), right_seq.get_second(j));
+                ++j;
             }
-        }
-        while (i < n1) {
-            merged->set(k++, left->get(i++));
-        }
-        while (j < n2) {
-            merged->set(k++, right->get(j++));
+            ++k;
         }
 
-        delete left;
-        delete right;
-        return merged;
+        // Копируем оставшиеся элементы из left_seq, если есть
+        while (i < n1) {
+            seq.set(k, left_seq.get_first(i), left_seq.get_second(i));
+            ++i;
+            ++k;
+        }
+
+        // Копируем оставшиеся элементы из right_seq, если есть
+        while (j < n2) {
+            seq.set(k, right_seq.get_first(j), right_seq.get_second(j));
+            ++j;
+            ++k;
+        }
     }
 };
 

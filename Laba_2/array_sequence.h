@@ -18,8 +18,10 @@ private:
     }
 
 public:
+    ArraySequence() : length(0), data(nullptr) {}
+
     // Конструктор с заданным размером
-    ArraySequence(int size) : data(new T[size]), length(size) {}
+    explicit ArraySequence(int size) : data(new T[size]), length(size) {}
 
     // Конструктор копирования
     ArraySequence(const ArraySequence<T>& other) 
